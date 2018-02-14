@@ -11,14 +11,14 @@
 
 # ==============================================================================
 # Developer Helpers
-# =============================================================================
+# ==============================================================================
 
 help: ## Prints This Help File
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 # ==============================================================================
 # CA Helpers
-# =============================================================================
+# ==============================================================================
 
 ca_gen_key: ## Generate CA Private Key
 	openssl genrsa -des3 -out cert/ca.key 4096
@@ -28,7 +28,7 @@ ca_gen: ca_gen_key ## Generate CA File
 
 # ==============================================================================
 # Client Helpers
-# =============================================================================
+# ==============================================================================
 
 client_gen_key: ## Generate Client Private Key
 	openssl genrsa -des3 -out cert/client/client.key 4096
@@ -41,3 +41,16 @@ client_sign_key: client_gen_key ## Sign Client Private Key
 client_gen: client_sign_key ## Generate Multiple Certifcates
 	openssl pkcs12 -export -clcerts -in cert/client/client.crt -inkey cert/client/client.key -out cert/client/client.p12
 	openssl pkcs12 -in cert/client/client.p12 -out cert/client/client.pem -clcerts
+
+# ==============================================================================
+# Server Helpers
+# ==============================================================================
+
+.ONESHELL:
+server_gen: ## Generate CSR
+	@read -p "Enter Server Domain:" server_domain; 
+	openssl req -new -newkey rsa:2048 -nodes -out server.csr -keyout server.key
+	mv server.csr $$server_domain.csr
+	mv server.key $$server_domain.key
+
+
